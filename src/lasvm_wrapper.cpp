@@ -78,16 +78,26 @@ char *convert(const std::string & s)
 
 
 
-//' lasvmTrain
+
+//' lasvmTrainWrapper
 //' 
 //' Use lasvm to train a given problem.
 //'
 //'  @param	x		data matrix 
-//'  @param	rounds		number of rounds (orthogonal views)
-//'  @param	k		number of clusters
-//'  @param	iter	numer of iterations in one round
-//'  @param	initType		centroid initialization via Random or KMeans++
-//'  @param	verbose		verbose output?
+//'  @param	y		training labels
+//'  @param	gamma	RBF kernel bandwidth
+//'  @param	cost		regularization constant
+//'   @param  degree 	degree for poly kernel
+//'   @param  coef0 	coefficient for poly kernel
+//'   @param  optimizer 	type of optimizer
+//'   @param  kernel 	kernel type
+//'   @param  selection 	selection strategy
+//'   @param  termination 	criterion for stopping
+//'   @param  cachesize 	size of kernel cache
+//'   @param  bias 	use  bias?
+//'   @param  epochs 	number of epochs
+//'   @param epsilon 	stopping criterion parameter
+//'   @param	verbose		verbose output?
 //'
 //'  @return	a list consisting of
 //'	centers	these are the resulting centroids of the kmean algorithm (as a std::vector of NumericMatrix)
@@ -106,6 +116,7 @@ List lasvmTrainWrapper(
 	int kernel = 2,
 	int selection = 0,
 	int termination = 0,
+	double sample = 0,
 	int cachesize = 256,
 	int bias = 1,
 	int epochs = 1,
@@ -123,6 +134,7 @@ List lasvmTrainWrapper(
 	tmpS << "-t"; vec.push_back(tmpS.str()); tmpS.str(""); tmpS.clear(); tmpS <<  kernel; vec.push_back(tmpS.str()); tmpS.str (""); tmpS.clear();
 	tmpS << "-s"; vec.push_back(tmpS.str()); tmpS.str(""); tmpS.clear(); tmpS <<  selection; vec.push_back(tmpS.str()); tmpS.str (""); tmpS.clear();
 	tmpS << "-T"; vec.push_back(tmpS.str()); tmpS.str(""); tmpS.clear(); tmpS <<  termination; vec.push_back(tmpS.str()); tmpS.str (""); tmpS.clear();
+	tmpS << "-l"; vec.push_back(tmpS.str()); tmpS.str(""); tmpS.clear(); tmpS <<  sample; vec.push_back(tmpS.str()); tmpS.str (""); tmpS.clear();
 	tmpS << "-g"; vec.push_back(tmpS.str()); tmpS.str(""); tmpS.clear(); tmpS <<  gamma; vec.push_back(tmpS.str()); tmpS.str (""); tmpS.clear();
 	tmpS << "-c"; vec.push_back(tmpS.str()); tmpS.str(""); tmpS.clear(); tmpS <<  cost; vec.push_back(tmpS.str()); tmpS.str (""); tmpS.clear();
 	tmpS << "-d"; vec.push_back(tmpS.str()); tmpS.str(""); tmpS.clear(); tmpS <<  degree; vec.push_back(tmpS.str()); tmpS.str (""); tmpS.clear();
@@ -161,6 +173,7 @@ List lasvmTrainWrapper(
 	delete [] arr;
 	
 	// convert data into libsvm format
+	m = 0;
 	lasvm_sparsevector_t* v;
 	for (int i = 0; i < x.rows(); i++) {
 		v = lasvm_sparsevector_create();
@@ -227,21 +240,19 @@ List lasvmTrainWrapper(
 
 
 
-//' lasvmTrain
+//' lasvmPredictWrapper
 //' 
-//' Use lasvm to train a given problem.
+//' Use lasvm to predict a given problem.
 //'
 //'  @param	x		data matrix 
-//'  @param	rounds		number of rounds (orthogonal views)
-//'  @param	k		number of clusters
-//'  @param	iter	numer of iterations in one round
-//'  @param	initType		centroid initialization via Random or KMeans++
+//'  @param	SV		matrix of support vectors
+//'  @param	elif		vector of alphas
+//'  @param	gamma		gamma of RBF kernel 
+//'  @param	bias		bias term
 //'  @param	verbose		verbose output?
 //'
 //'  @return	a list consisting of
-//'	centers	these are the resulting centroids of the kmean algorithm (as a std::vector of NumericMatrix)
-//'	cluster 	these are the labels for the resulting clustering (as a std::vector of NumericVector)
-//'	obj			this is a vector with the final objective value for each round
+//'	predictions		just the predictions
 //'
 //; @TODO: support other kernels than RBF
 //'
@@ -252,9 +263,21 @@ List lasvmPredictWrapper(
 	Rcpp::NumericVector elif,
 	double gamma,
 	double bias,
+	int kerneltype,
 	bool verbose = false
 )
 {
+	// set parameter
+	kernel_type = kerneltype;
+	kgamma = gamma;
+	b0 = bias;	
+	
+	if (verbose == true) {
+		Rcout << "Kernel type: " << kernel_type << "\n";
+		Rcout << "Gamma: " << kgamma << "\n";
+		Rcout << "Bias: "<< b0 << "\n";
+	}
+	
 	// copy alpha over to lasvm
 	alpha.clear();
 	std::copy (elif.begin(), elif.end(), alpha.begin());
@@ -262,6 +285,8 @@ List lasvmPredictWrapper(
 	// copy SV over to lasvm
 	msv = elif.size();
 	lasvm_sparsevector_t* v;
+	m = 0;
+	Xsv.clear();
 	for (int i = 0; i < msv; i++) {
 		v = lasvm_sparsevector_create();
 		Xsv.push_back(v);
@@ -284,6 +309,7 @@ List lasvmPredictWrapper(
 	
 	// copy over data 
 	m = 0;
+	X.clear();
 	for (int i = 0; i < x.rows(); i++) {
 		v = lasvm_sparsevector_create();
 		X.push_back(v);
@@ -296,11 +322,6 @@ List lasvmPredictWrapper(
 	adapt_data (x.rows());
 	max_index = x.cols();
 	
-	// make sure all needed vars are set
-	// kernel_type
-	// gamma
-	kgamma = gamma;
-	b0 = bias;	
 	
 	// compute predictions
 	NumericVector predictions (x.rows());
@@ -337,7 +358,6 @@ List lasvmPredictWrapper(
 	// return list
 	Rcpp::List rl = Rcpp::List::create (
 		Rcpp::Named ("predictions", predictions)
-//		Rcpp::Named ("alpha", elif)
 	);
 	
 	return (rl);

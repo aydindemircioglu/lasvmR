@@ -33,7 +33,6 @@ using namespace Rcpp;
 #define ITERATIONS 0
 #define SVS 1
 #define TIME 2
-#define FULLTIME 3
 
 const char *kernel_type_table[] = {"linear","polynomial","rbf","sigmoid"};
 
@@ -53,7 +52,8 @@ private:
 stopwatch::~stopwatch()
 {
     clock_t total = clock()-start; //get elapsed time
-    Rcout<<"Time(secs): "<<double(total)/CLOCKS_PER_SEC<<endl;
+//     if (verbosity > 0)
+// 		Rcout<<"Time(secs): "<<double(total)/CLOCKS_PER_SEC<<endl;
 }
 class ID // class to hold split file indices and labels
 {
@@ -118,7 +118,8 @@ void exit_with_help()
 void la_svm_parse_command_line(int argc, char **argv, char *input_file_name, char *model_file_name)
 {
     int i; int clss; double weight;
-    
+	select_size.clear();
+	
     // parse options
     for(i=1;i<argc;i++) 
     {
@@ -192,12 +193,13 @@ void la_svm_parse_command_line(int argc, char **argv, char *input_file_name, cha
         }
     }
 
-    Rcout << "\tepochs: \t" << epochs << "\n";
+    if (verbosity > 0)
+		Rcout << "\tepochs: \t" << epochs << "\n";
     
     saves=select_size.size(); 
     if(saves==0) select_size.push_back(100000000);
-	
-	if (saves > 1)
+
+	if (saves != 1)
 		stop ("Sorry, lasvmR does not support more than one save for now.");
 }
 
@@ -428,14 +430,12 @@ void train_online(char *model_file_name, char *input_file_name)
     char t[1000];
     strcpy(t,model_file_name);
     strcat(t,".time");
-    
-	if (termination_type==FULLTIME)
-		load_data_file(input_file_name);
-	
+    	
     lasvm_kcache_t *kcache=lasvm_kcache_create(kernel, NULL);
     lasvm_kcache_set_maximum_size(kcache, cache_size*1024*1024);
     lasvm_t *sv=lasvm_create(kcache,use_b0,C*C_pos,C*C_neg);
-    Rcout << "set cache size to " << cache_size << "\n";
+	if (verbosity > 0)
+		Rcout << "set cache size to " << cache_size << "\n";
 
     // everything is new when we start
     for(i=0;i<m;i++) inew.push_back(i);
@@ -451,31 +451,30 @@ void train_online(char *model_file_name, char *input_file_name)
     
     for(j=0;j<epochs;j++)
     {
-        for(i=0;i<m;i++)
+		Rcpp::checkUserInterrupt();
+		for(i=0;i<m;i++)
         {
-			if (termination_type==FULLTIME && sw->get_time()>=select_size[0])
-			{
-				finish(sv); // if haven't done any intermediate saves, do final save
-				return;
-			}
-			
 			if(inew.size()==0) break; // nothing more to select
             s=select(sv);            // selection strategy, select new point
             
             t1=lasvm_process(sv,s,(double) Y[s]);
             
-            if (deltamax<=1000) // potentially multiple calls to reprocess..
+			if (deltamax<=1000) // potentially multiple calls to reprocess..
             {
                 //printf("%g %g\n",lasvm_get_delta(sv),deltamax);
                 t2=lasvm_reprocess(sv,epsgr);// at least one call to reprocess
-                while (lasvm_get_delta(sv)>deltamax && deltamax<1000)
-                {
-                    t2=lasvm_reprocess(sv,epsgr);
-					if (termination_type==FULLTIME && sw->get_time()>=select_size[0])
+				// actally this does not work with multiple times, and we do not intent to anyway.
+				if (i % (m/10) == 1) 
+				{
+					if (termination_type==TIME && sw->get_time()>=select_size[0])
 					{
 						finish(sv); // if haven't done any intermediate saves, do final save
 						return;
 					}
+				}	
+				while (lasvm_get_delta(sv)>deltamax && deltamax<1000)
+                {
+                    t2=lasvm_reprocess(sv,epsgr);
 				}
             }
             
@@ -493,17 +492,13 @@ void train_online(char *model_file_name, char *input_file_name)
 				}
             
             l=(int) lasvm_get_l(sv);
-            for(k=0;k<(int)select_size.size();k++)
-            { 
-                if   ( (termination_type==ITERATIONS && i==select_size[k]) 
-                       || (termination_type==SVS && l>=select_size[k])
-                       || (termination_type==TIME && sw->get_time()>=select_size[k])
-					   || (termination_type==FULLTIME && sw->get_time()>=select_size[k])
-				) {
-					// correct me
-				}
-			 
-            }
+			if   ( (termination_type==ITERATIONS && i==select_size[0]) 
+					|| (termination_type==SVS && l>=select_size[0])
+					|| (termination_type==TIME && sw->get_time()>=select_size[0])
+				)
+			{  
+				select_size.pop_back();
+			}
             if(select_size.size()==0) break; // early stopping, all intermediate models saved
         }
 
@@ -536,10 +531,7 @@ int la_svm_main (int argc, char **argv)
     char model_file_name[1024];
 	la_svm_parse_command_line (argc, argv, input_file_name, model_file_name);
 
-	// load data outside only if we are not on fulltime,
-	// fulltime=all data incl. IO
-	if (termination_type!=FULLTIME)
-		load_data_file(input_file_name);
+	load_data_file(input_file_name);
 
     train_online(model_file_name, input_file_name);
     

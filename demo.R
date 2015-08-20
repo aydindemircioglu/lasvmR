@@ -6,7 +6,9 @@ library(devtools)
 load_all(".")
 
 
-
+library(testthat)
+test()
+stop()
 
 	# generate 2 clusters
 	set.seed(101)
@@ -31,8 +33,5 @@ load_all(".")
 	predictions = lasvmPredict (testdata, model, verbose = TRUE)
 	print (predictions)
 	
-stop()
 
 
-library(testthat)
-test()

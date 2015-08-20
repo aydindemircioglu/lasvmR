@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // lasvmTrainWrapper
-List lasvmTrainWrapper(Rcpp::NumericMatrix x, Rcpp::NumericVector y, double gamma, double cost, int degree, int coef0, int optimizer, int kernel, int selection, int termination, int cachesize, int bias, int epochs, double epsilon, bool verbose);
-RcppExport SEXP lasvmR_lasvmTrainWrapper(SEXP xSEXP, SEXP ySEXP, SEXP gammaSEXP, SEXP costSEXP, SEXP degreeSEXP, SEXP coef0SEXP, SEXP optimizerSEXP, SEXP kernelSEXP, SEXP selectionSEXP, SEXP terminationSEXP, SEXP cachesizeSEXP, SEXP biasSEXP, SEXP epochsSEXP, SEXP epsilonSEXP, SEXP verboseSEXP) {
+List lasvmTrainWrapper(Rcpp::NumericMatrix x, Rcpp::NumericVector y, double gamma, double cost, int degree, int coef0, int optimizer, int kernel, int selection, int termination, double sample, int cachesize, int bias, int epochs, double epsilon, bool verbose);
+RcppExport SEXP lasvmR_lasvmTrainWrapper(SEXP xSEXP, SEXP ySEXP, SEXP gammaSEXP, SEXP costSEXP, SEXP degreeSEXP, SEXP coef0SEXP, SEXP optimizerSEXP, SEXP kernelSEXP, SEXP selectionSEXP, SEXP terminationSEXP, SEXP sampleSEXP, SEXP cachesizeSEXP, SEXP biasSEXP, SEXP epochsSEXP, SEXP epsilonSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -21,18 +21,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type kernel(kernelSEXP);
     Rcpp::traits::input_parameter< int >::type selection(selectionSEXP);
     Rcpp::traits::input_parameter< int >::type termination(terminationSEXP);
+    Rcpp::traits::input_parameter< double >::type sample(sampleSEXP);
     Rcpp::traits::input_parameter< int >::type cachesize(cachesizeSEXP);
     Rcpp::traits::input_parameter< int >::type bias(biasSEXP);
     Rcpp::traits::input_parameter< int >::type epochs(epochsSEXP);
     Rcpp::traits::input_parameter< double >::type epsilon(epsilonSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    __result = Rcpp::wrap(lasvmTrainWrapper(x, y, gamma, cost, degree, coef0, optimizer, kernel, selection, termination, cachesize, bias, epochs, epsilon, verbose));
+    __result = Rcpp::wrap(lasvmTrainWrapper(x, y, gamma, cost, degree, coef0, optimizer, kernel, selection, termination, sample, cachesize, bias, epochs, epsilon, verbose));
     return __result;
 END_RCPP
 }
 // lasvmPredictWrapper
-List lasvmPredictWrapper(Rcpp::NumericMatrix x, Rcpp::NumericMatrix SV, Rcpp::NumericVector elif, double gamma, double bias, bool verbose);
-RcppExport SEXP lasvmR_lasvmPredictWrapper(SEXP xSEXP, SEXP SVSEXP, SEXP elifSEXP, SEXP gammaSEXP, SEXP biasSEXP, SEXP verboseSEXP) {
+List lasvmPredictWrapper(Rcpp::NumericMatrix x, Rcpp::NumericMatrix SV, Rcpp::NumericVector elif, double gamma, double bias, int kerneltype, bool verbose);
+RcppExport SEXP lasvmR_lasvmPredictWrapper(SEXP xSEXP, SEXP SVSEXP, SEXP elifSEXP, SEXP gammaSEXP, SEXP biasSEXP, SEXP kerneltypeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -41,8 +42,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type elif(elifSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< double >::type bias(biasSEXP);
+    Rcpp::traits::input_parameter< int >::type kerneltype(kerneltypeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    __result = Rcpp::wrap(lasvmPredictWrapper(x, SV, elif, gamma, bias, verbose));
+    __result = Rcpp::wrap(lasvmPredictWrapper(x, SV, elif, gamma, bias, kerneltype, verbose));
     return __result;
 END_RCPP
 }

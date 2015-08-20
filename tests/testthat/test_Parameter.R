@@ -1,14 +1,14 @@
-context("LASVM Regressiontest")	
+context("LASVM Parametertest")	
 
 
-test_that("our wrapper gives the same output as LASVM called by command line", {
+test_that("walltime works roughly as expected", {
 	# generate synthetic data set (see some stack overflow question)
 
 	# generate original model via ./la_svm -o 0 -t 2 -s 1 -p 5 -g 2 -c 2 ./synthetical.sparse.train lasvm.model
 	# and then predictions via ./la_test ./synthetical.sparse.test ./lasvm.model predictions
 	# NOTE: the original LASVM (v1.1) has a bug, and will not save the predictions. you just need to insert
 	# a fprintf (fp, "%d\n", (int)y); at the end of the loop in the predict routine.
-		
+	
 	# generate 2 clusters
 	set.seed(101)
 	qx = rnorm(100, mean = -3, sd = 1) - 1
@@ -27,13 +27,13 @@ test_that("our wrapper gives the same output as LASVM called by command line", {
 	testdata = rbind( cbind(px, py), cbind(qx, qy) )
 	testlabel = sign (testdata[,1])
 
-	model = lasvmTrain (x = traindata, y = trainlabel, gamma = 2, cost = 2, epochs = 5, optimizer = 0, kernel = 2, selection = 1, verbose = TRUE)
-	print (model)
-	predictions = lasvmPredict (testdata, model, verbose = TRUE)
-
-	print (predictions$predictions - testlabel)
-	expect_equal (sum(abs(predictions$predictions - testlabel)), 0)
+	mT = system.time( lasvmTrain (x = traindata, y = trainlabel, gamma = 1, cost = 1, epochs = 99999999, 
+		termination = 2, 
+		sample = 5, # only 5 seconds for each iteration
+		kernel = 2, 
+		verbose = FALSE))
 	
+	expect_less_than (mT[3], 10)
 	
 	# test the same for polynomial kernel
 	

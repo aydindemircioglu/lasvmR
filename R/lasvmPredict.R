@@ -43,11 +43,10 @@ lasvmPredict = function (x, model, verbose = FALSE)
 	checkmate::assertClass (model, "lasvmR.model")
 	checkmate::assertFlag (verbose)
 	
-	# SET KERNEL
-	
 	results = lasvmPredictWrapper (x, model$SV, model$alpha, 
 		gamma = model$gamma,
 		bias = 	 model$bias,
+		kerneltype = model$kernel,
 		verbose = verbose)
 
 	return (results);

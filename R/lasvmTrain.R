@@ -34,6 +34,7 @@
 #'  @param  kernel 	kernel type
 #'  @param  selection 	selection strategy
 #'  @param  termination 	criterion for stopping
+#'  @param  sample		time for stopping/number of iterations tec
 #'  @param  cachesize 	size of kernel cache
 #'  @param  bias 	use  bias?
 #'  @param  epochs 	number of epochs
@@ -52,12 +53,12 @@ lasvmTrain = function (x, y, gamma, cost,
 	 kernel = 2,
 	 selection = 0,
 	 termination = 0,
+	 sample = 100000000, # from source code
 	 cachesize = 256,
 	 bias = 1,
 	 epochs = 1,
 	epsilon = 0.001,
-	verbose = FALSE
-)
+	verbose = FALSE)
 {
 	# check arguments TODO: addl imits
 	checkmate::assertMatrix(x, min.rows = 1)
@@ -66,6 +67,7 @@ lasvmTrain = function (x, y, gamma, cost,
 	checkmate::checkNumber(gamma, lower = 0)
 	checkmate::checkNumber(degree, lower = 0)
 	checkmate::checkNumber(coef0)
+	checkmate::checkNumber(sample)
 	checkmate::assertCount(optimizer)
 	checkmate::assertCount(kernel)
 	checkmate::assertCount(selection)
@@ -75,7 +77,7 @@ lasvmTrain = function (x, y, gamma, cost,
 	checkmate::assertCount(epochs)
 	checkmate::checkNumber(epsilon)
 	checkmate::assertFlag (verbose)
-	
+
 	model = lasvmTrainWrapper (x, y, gamma, cost, 
 		degree = 	 degree,
 		coef0 = 	 coef0,
@@ -83,11 +85,12 @@ lasvmTrain = function (x, y, gamma, cost,
 		kernel = 	 kernel,
 		selection = 	 selection,
 		termination = 	 termination,
+		sample = sample,
 		cachesize = 	 cachesize,
 		bias = 	 bias,
 		epochs = 	 epochs,
 		epsilon = 	epsilon,
-		verbose = FALSE)
+		verbose = verbose)
 
 	# move other needed data into model
 	model$gamma = gamma
