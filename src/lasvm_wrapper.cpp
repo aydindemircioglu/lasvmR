@@ -36,20 +36,26 @@ using namespace Rcpp;
 
 
 
+#define LINEAR  0
+#define POLY    1
+#define RBF     2
+#define SIGMOID 3 
+
+
 extern int m;
 extern int msv;                         // training and test set sizes
 extern vector <lasvm_sparsevector_t*> X; // feature vectors for test set
-// vector <lasvm_sparsevector_t*> Xsv;// feature vectors for SVs
+extern vector <lasvm_sparsevector_t*> Xsv;// feature vectors for SVs
 extern vector <int> Y;                   // labels
 extern vector <double> alpha;            // alpha_i, SV weights
 extern double b0;                        // threshold
 // extern int use_b0;                     // use threshold via constraint \sum a_i y_i =0
-// extern int kernel_type;              // LINEAR, POLY, RBF or SIGMOID kernels
+extern int kernel_type;              // LINEAR, POLY, RBF or SIGMOID kernels
 // extern double degree;
 extern double kgamma;
 // extern double coef0; // kernel params
 // extern vector <double> x_square;         // norms of input vectors, used for RBF
-// vector <double> xsv_square;        // norms of test vectors, used for RBF
+extern vector <double> xsv_square;        // norms of test vectors, used for RBF
 // extern char split_file_name[1024];         // filename for the splits
 // extern int binary_files;
 // extern vector <ID> splits;             
@@ -242,10 +248,35 @@ List lasvmPredictWrapper(
 	bool verbose = false
 )
 {
-	// copy alpha, SVs over to lasvm
+	// copy alpha over to lasvm
+	alpha.clear();
+	std::copy (elif.begin(), elif.end(), alpha.begin());
+
+	// copy SV over to lasvm
+	msv = elif.size();
+	lasvm_sparsevector_t* v;
+	for (int i = 0; i < msv; i++) {
+		v = lasvm_sparsevector_create();
+		Xsv.push_back(v);
+		
+		for (int j = 0; j < x.cols(); j++) {
+			if (x(i, j) != 0)
+				lasvm_sparsevector_set(X[i], j, x(i, j));
+				lasvm_sparsevector_set(Xsv[i], j, x(i,j) );
+		}
+	}
+	
+	if (kernel_type==RBF)
+	{
+		xsv_square.resize(msv);
+		for (int i=0;i<msv;i++)
+			xsv_square[i] = lasvm_sparsevector_dot_product(Xsv[i],Xsv[i]);
+	}
+	
+	max_index = x.cols();
+	
 	
 	// copy over data 
-	lasvm_sparsevector_t* v;
 	for (int i = 0; i < x.rows(); i++) {
 		v = lasvm_sparsevector_create();
 		X.push_back(v);
