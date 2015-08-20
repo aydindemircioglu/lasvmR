@@ -45,6 +45,8 @@ lasvmPredict = function (x, model, verbose = FALSE)
 	
 	results = lasvmPredictWrapper (x, model$SV, model$alpha, 
 		gamma = model$gamma,
+		kdegree = model$degree,
+		kcoef0 = model$coef0,
 		bias = 	 model$bias,
 		kerneltype = model$kernel,
 		verbose = verbose)

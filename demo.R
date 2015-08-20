@@ -25,7 +25,7 @@ library(SVMBridge)
 		model = lasvmTrain (x[trIdx,], y[trIdx,], degree = runif(1)*10000, coef0 = runif(1)*10000, gamma = runif(1)*10000, cost = runif(1)*10000, epochs = round(runif(1)*100), optimizer = round(runif(1)), kernel = round(runif(1)*3), selection = round(runif(1)*2), verbose = FALSE)
 		predictions = lasvmPredict (x[testIdx,], model, verbose = FALSE)
 	}
-stop("R")		
+
 	# test the same for polynomial kernel
 	model = lasvmTrain (x[1:100,], y[1:100], degree = 4, coef0 = 3, cost = 2, epochs = 1, optimizer = 1, kernel = 3, selection = 1, verbose = FALSE)
 	predictions = lasvmPredict (x[101:150,], model, verbose = FALSE)

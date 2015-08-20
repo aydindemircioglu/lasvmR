@@ -9,6 +9,8 @@
 #'  @param	SV		matrix of support vectors
 #'  @param	elif		vector of alphas
 #'  @param	gamma		gamma of RBF kernel 
+#'  @param	degree	degree for POLY kernel
+#'  @param	coef0		coef0 for kernel
 #'  @param	bias		bias term
 #'  @param	verbose		verbose output?
 #'
@@ -42,12 +44,12 @@ NULL
 #'	cluster 	these are the labels for the resulting clustering (as a std::vector of NumericVector)
 #'	obj			this is a vector with the final objective value for each round
 #'
-lasvmTrainWrapper <- function(x, y, gamma, cost, degree = 3L, coef0 = 0L, optimizer = 1L, kernel = 2L, selection = 0L, termination = 0L, sample = 0, cachesize = 256L, bias = 1L, epochs = 1L, epsilon = 0.001, verbose = FALSE) {
+lasvmTrainWrapper <- function(x, y, gamma, cost, degree = 3, coef0 = 0L, optimizer = 1L, kernel = 2L, selection = 0L, termination = 0L, sample = 0, cachesize = 256L, bias = 1L, epochs = 1L, epsilon = 0.001, verbose = FALSE) {
     .Call('lasvmR_lasvmTrainWrapper', PACKAGE = 'lasvmR', x, y, gamma, cost, degree, coef0, optimizer, kernel, selection, termination, sample, cachesize, bias, epochs, epsilon, verbose)
 }
 
 #'
-lasvmPredictWrapper <- function(x, SV, elif, gamma, bias, kerneltype, verbose = FALSE) {
-    .Call('lasvmR_lasvmPredictWrapper', PACKAGE = 'lasvmR', x, SV, elif, gamma, bias, kerneltype, verbose)
+lasvmPredictWrapper <- function(x, SV, elif, gamma, kdegree, kcoef0, bias, kerneltype, verbose = FALSE) {
+    .Call('lasvmR_lasvmPredictWrapper', PACKAGE = 'lasvmR', x, SV, elif, gamma, kdegree, kcoef0, bias, kerneltype, verbose)
 }
 

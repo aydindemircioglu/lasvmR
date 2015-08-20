@@ -6,7 +6,7 @@
 using namespace Rcpp;
 
 // lasvmTrainWrapper
-List lasvmTrainWrapper(Rcpp::NumericMatrix x, Rcpp::NumericVector y, double gamma, double cost, int degree, int coef0, int optimizer, int kernel, int selection, int termination, double sample, int cachesize, int bias, int epochs, double epsilon, bool verbose);
+List lasvmTrainWrapper(Rcpp::NumericMatrix x, Rcpp::NumericVector y, double gamma, double cost, double degree, int coef0, int optimizer, int kernel, int selection, int termination, double sample, int cachesize, int bias, int epochs, double epsilon, bool verbose);
 RcppExport SEXP lasvmR_lasvmTrainWrapper(SEXP xSEXP, SEXP ySEXP, SEXP gammaSEXP, SEXP costSEXP, SEXP degreeSEXP, SEXP coef0SEXP, SEXP optimizerSEXP, SEXP kernelSEXP, SEXP selectionSEXP, SEXP terminationSEXP, SEXP sampleSEXP, SEXP cachesizeSEXP, SEXP biasSEXP, SEXP epochsSEXP, SEXP epsilonSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
@@ -15,7 +15,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< double >::type cost(costSEXP);
-    Rcpp::traits::input_parameter< int >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< double >::type degree(degreeSEXP);
     Rcpp::traits::input_parameter< int >::type coef0(coef0SEXP);
     Rcpp::traits::input_parameter< int >::type optimizer(optimizerSEXP);
     Rcpp::traits::input_parameter< int >::type kernel(kernelSEXP);
@@ -32,8 +32,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // lasvmPredictWrapper
-List lasvmPredictWrapper(Rcpp::NumericMatrix x, Rcpp::NumericMatrix SV, Rcpp::NumericVector elif, double gamma, double bias, int kerneltype, bool verbose);
-RcppExport SEXP lasvmR_lasvmPredictWrapper(SEXP xSEXP, SEXP SVSEXP, SEXP elifSEXP, SEXP gammaSEXP, SEXP biasSEXP, SEXP kerneltypeSEXP, SEXP verboseSEXP) {
+List lasvmPredictWrapper(Rcpp::NumericMatrix x, Rcpp::NumericMatrix SV, Rcpp::NumericVector elif, double gamma, double kdegree, double kcoef0, double bias, int kerneltype, bool verbose);
+RcppExport SEXP lasvmR_lasvmPredictWrapper(SEXP xSEXP, SEXP SVSEXP, SEXP elifSEXP, SEXP gammaSEXP, SEXP kdegreeSEXP, SEXP kcoef0SEXP, SEXP biasSEXP, SEXP kerneltypeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -41,10 +41,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type SV(SVSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type elif(elifSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type kdegree(kdegreeSEXP);
+    Rcpp::traits::input_parameter< double >::type kcoef0(kcoef0SEXP);
     Rcpp::traits::input_parameter< double >::type bias(biasSEXP);
     Rcpp::traits::input_parameter< int >::type kerneltype(kerneltypeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    __result = Rcpp::wrap(lasvmPredictWrapper(x, SV, elif, gamma, bias, kerneltype, verbose));
+    __result = Rcpp::wrap(lasvmPredictWrapper(x, SV, elif, gamma, kdegree, kcoef0, bias, kerneltype, verbose));
     return __result;
 END_RCPP
 }

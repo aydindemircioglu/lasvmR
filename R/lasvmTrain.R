@@ -99,8 +99,8 @@ lasvmTrain = function (x, y,
 	# move other needed data into model
 	model$gamma = gamma
 	model$degree = degree
-	model$cost = cost
 	model$coef0 = coef0
+	model$cost = cost
 	model$kernel = kernel
 		
 	class(model) <- c("lasvmR.model")

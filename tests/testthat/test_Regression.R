@@ -34,7 +34,6 @@ test_that("our wrapper gives the same output as LASVM called by command line", {
 
 	
 	
-	
 		# take 0815 iris set
 	d = iris[sample(nrow(iris)),]
 	x = as.matrix(d[,1:4])
@@ -72,4 +71,24 @@ test_that("our wrapper gives the same output as LASVM called by command line", {
 })
 
 
+test_that("different parameter combinations does not make lasvmR crash", {
 
+	# take 0815 iris set
+	d = iris[sample(nrow(iris)),]
+	x = as.matrix(d[,1:4])
+	y = as.matrix(as.numeric(d[,5]))
+	y[y==3] = 1
+	y[y==2] = -1
+
+	for (i in 1:128) {
+		s = sample(nrow(iris))
+		p = round(runif(1)*(nrow(iris)-10))+5
+		trIdx = s[1:p]
+		testIdx = s[p+1:nrow(iris)]
+
+		model = lasvmTrain (x[trIdx,], y[trIdx,], degree = runif(1)*10000, coef0 = runif(1)*10000, gamma = runif(1)*10000, cost = runif(1)*10000, epochs = round(runif(1)*100), optimizer = round(runif(1)), kernel = round(runif(1)*3), selection = round(runif(1)*2), verbose = FALSE)
+		predictions = lasvmPredict (x[testIdx,], model, verbose = FALSE)
+	}
+	
+	expect_equal (1, 1)
+})

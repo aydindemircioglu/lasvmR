@@ -114,7 +114,7 @@ List lasvmTrainWrapper(
 	Rcpp::NumericVector y,
 	double gamma,
 	double cost,
-	int degree = 3,
+	double degree = 3,
 	int coef0 = 0,
 	int optimizer = 1,
 	int kernel = 2,
@@ -255,6 +255,8 @@ List lasvmTrainWrapper(
 //'  @param	SV		matrix of support vectors
 //'  @param	elif		vector of alphas
 //'  @param	gamma		gamma of RBF kernel 
+//'  @param	degree	degree for POLY kernel
+//'  @param	coef0		coef0 for kernel
 //'  @param	bias		bias term
 //'  @param	verbose		verbose output?
 //'
@@ -269,6 +271,8 @@ List lasvmPredictWrapper(
 	Rcpp::NumericMatrix SV,
 	Rcpp::NumericVector elif,
 	double gamma,
+	double kdegree,
+	double kcoef0,
 	double bias,
 	int kerneltype,
 	bool verbose = false
@@ -278,6 +282,8 @@ List lasvmPredictWrapper(
 	kernel_type = kerneltype;
 	kgamma = gamma;
 	b0 = bias;	
+	degree = kdegree;
+	coef0 = kcoef0;
 	
 	if (verbose == true) {
 		Rcout << "Kernel type: " << kernel_type << "\n";
