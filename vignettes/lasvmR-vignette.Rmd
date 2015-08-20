@@ -1,0 +1,47 @@
+---
+title: "lasvmR"
+author: "Aydin Demircioglu"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{lasvmR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Introduction
+
+lasvmR is a simple wrapper for the K-Means C++ library 
+([yakmo](www.tkl.iis.u-tokyo.ac.jp/~ynaga/yakmo/)) developed
+by Naoki Yoshinaga.
+
+lasvmR implements orthogonal K-Means. It can work in several rounds.
+In the first round, a normal K-Means is applied to the data.
+In each subsequent round, the next clustering is done on a subspace orthogonal
+to the centroids of the last clustering. This way one produces different
+views on the data.
+To speed up the whole procedure, Greg Hamerlys faster K-Means
+is utilized. Initilization can be done either classically (uniformly random)
+or by using the K-Means++ scheme.
+
+
+
+
+## Example
+
+
+```{r, echo=TRUE, results='asis', eval=TRUE}
+library(lasvmR)
+
+data(iris)
+irisM = as.matrix(iris[sample(nrow(iris)), -5]) # convert to matrix, also remove class-information
+dat = irisM[1:100, ] # take first 100 data points for clustering
+resObj = lasvmR::orthoKMeansTrain (x = dat, k = 3,  rounds = 4)
+centers2 = resObj$centers[[2]] # centers of 2nd round
+
+dat = as.matrix( irisM[101:nrow(irisM), -5]) # take rest of data for prediction
+results = lasvmR::orthoKMeansPredict (x = dat, obj = resObj)
+```
+
+
