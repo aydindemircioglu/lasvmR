@@ -42,7 +42,7 @@ extern int msv;                         // training and test set sizes
 extern vector <lasvm_sparsevector_t*> X; // feature vectors for test set
 // vector <lasvm_sparsevector_t*> Xsv;// feature vectors for SVs
 extern vector <int> Y;                   // labels
-// extern vector <double> alpha;            // alpha_i, SV weights
+extern vector <double> alpha;            // alpha_i, SV weights
 // extern double b0;                        // threshold
 // extern int use_b0;                     // use threshold via constraint \sum a_i y_i =0
 // extern int kernel_type;              // LINEAR, POLY, RBF or SIGMOID kernels
@@ -55,10 +55,12 @@ extern vector <int> Y;                   // labels
 // extern int binary_files;
 // extern vector <ID> splits;             
 extern int max_index;
+extern double alpha_tol;
 
 void la_svm_parse_command_line (int argc, char **argv, char *input_file_name, char *model_file_name);
 void adapt_data(int msz);
 void train_online(char *model_file_name, char *input_file_name);
+int count_svs();
 
 
 char *convert(const std::string & s)
@@ -174,15 +176,38 @@ List lasvmTrain(
 	// now start training
 	train_online(model_file_name, input_file_name);
 	
+	if (verbose == TRUE)
+		Rcout << count_svs() << " support vectors found.\n";
 	
-	// now call lasvm
-	NumericMatrix SV;
-	NumericVector alpha;
+	// extract SVs
+	NumericMatrix SV (count_svs(), x.cols());
+	NumericVector elif (count_svs()); // alpha
+	
+	int c = 0;
+	for(int j=0; j<2; j++) {
+		for(int i=0; i<x.rows(); i++) {
+			if (j==0 && Y[i]==-1) continue;
+			if (j==1 && Y[i]==1) continue;
+			if (alpha[i]*Y[i]< alpha_tol) continue; // not an SV
+			
+			elif [c] = alpha[i];
+			
+			lasvm_sparsevector_pair_t *p1 = X[i]->pairs;
+			while (p1) {
+				SV (c, p1->index) = p1->data;
+				p1 = p1->next;
+			}
+			Rcout << c << ", ";
+			c++;
+		}
+	}
+	
+	Rcout << "haeh\n";
 	
 	// return list
 	Rcpp::List rl = Rcpp::List::create (
 		Rcpp::Named ("SV", SV),
-		Rcpp::Named ("alpha", alpha)
+		Rcpp::Named ("alpha", elif)
 	);
 		
 	return (rl);

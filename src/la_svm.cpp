@@ -703,12 +703,12 @@ int select(lasvm_t *sv) // selection strategy
     switch(selection_type)
     {
     case RANDOM:   // pick a random candidate
-        s=rand() % inew.size();
+        s=R::runif (0,inew.size());
         break;
 
     case GRADIENT: // pick best gradient from 50 candidates
         j=candidates; if((int)inew.size()<j) j=inew.size();
-        r=rand() % inew.size();
+		r=R::runif (0,inew.size());
         s=r;
         best=1e20;
         for(i=0;i<j;i++)
@@ -718,14 +718,14 @@ int select(lasvm_t *sv) // selection strategy
             tmp*=Y[r];
             //printf("%d: example %d   grad=%g\n",i,r,tmp);
             if(tmp<best) {best=tmp;ind=s;}
-            s=rand() % inew.size();
-        }  
+        	s=R::runif (0,inew.size());
+		}  
         s=ind;
         break;
 
     case MARGIN:  // pick closest to margin from 50 candidates
         j=candidates; if((int)inew.size()<j) j=inew.size();
-        r=rand() % inew.size();
+		r=R::runif (0,inew.size());
         s=r;
         best=1e20;
         for(i=0;i<j;i++)
@@ -735,8 +735,8 @@ int select(lasvm_t *sv) // selection strategy
             if (tmp<0) tmp=-tmp; 
             //printf("%d: example %d   grad=%g\n",i,r,tmp);
             if(tmp<best) {best=tmp;ind=s;}
-            s=rand() % inew.size();
-        }  
+			s=R::runif (0,inew.size());
+		}  
         s=ind;
         break;
     }
