@@ -59,21 +59,44 @@ lasvmTrain = function (x, y, gamma, cost,
 	verbose = FALSE
 )
 {
-	# check arguments
+	# check arguments TODO: addl imits
+	checkmate::assertMatrix(x, min.rows = 1)
+	checkmate::assertVector(y)
+	checkmate::checkNumber(cost, lower = 0)
+	checkmate::checkNumber(gamma, lower = 0)
+	checkmate::checkNumber(degree, lower = 0)
+	checkmate::checkNumber(coef0)
+	checkmate::assertCount(optimizer)
+	checkmate::assertCount(kernel)
+	checkmate::assertCount(selection)
+	checkmate::assertCount(termination)
+	checkmate::assertCount(cachesize)
+	checkmate::assertCount(bias)
+	checkmate::assertCount(epochs)
+	checkmate::checkNumber(epsilon)
+	checkmate::assertFlag (verbose)
 	
-	rl = lasvmTrainWrapper (x, y, gamma, cost, 
-	 degree = 	 degree,
-	 coef0 = 	 coef0,
-	 optimizer = 	 optimizer,
-	 kernel = 	 kernel,
-	 selection = 	 selection,
-	 termination = 	 termination,
-	 cachesize = 	 cachesize,
-	 bias = 	 bias,
-	 epochs = 	 epochs,
-	epsilon = 	epsilon,
-	verbose = FALSE)
+	model = lasvmTrainWrapper (x, y, gamma, cost, 
+		degree = 	 degree,
+		coef0 = 	 coef0,
+		optimizer = 	 optimizer,
+		kernel = 	 kernel,
+		selection = 	 selection,
+		termination = 	 termination,
+		cachesize = 	 cachesize,
+		bias = 	 bias,
+		epochs = 	 epochs,
+		epsilon = 	epsilon,
+		verbose = FALSE)
 
-	return (rl);
+	# move other needed data into model
+	model$gamma = gamma
+	model$degree = degree
+	model$cost = cost
+	model$coef0 = coef0
+	model$kernel = kernel
+		
+	class(model) <- c("lasvmR.model")
+	return (model)
 }
 

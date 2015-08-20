@@ -54,7 +54,7 @@ extern int kernel_type;              // LINEAR, POLY, RBF or SIGMOID kernels
 // extern double degree;
 extern double kgamma;
 // extern double coef0; // kernel params
-// extern vector <double> x_square;         // norms of input vectors, used for RBF
+extern vector <double> x_square;         // norms of input vectors, used for RBF
 extern vector <double> xsv_square;        // norms of test vectors, used for RBF
 // extern char split_file_name[1024];         // filename for the splits
 // extern int binary_files;
@@ -207,11 +207,18 @@ List lasvmTrainWrapper(
 			c++;
 		}
 	}
+
+	// free memory
+	for (int i = 0; i < X.size(); i++) {
+		lasvm_sparsevector_destroy(X[i]);
+	}
+	X.clear();
 	
 	// return list
 	Rcpp::List rl = Rcpp::List::create (
 		Rcpp::Named ("SV", SV),
-		Rcpp::Named ("alpha", elif)
+		Rcpp::Named ("alpha", elif),
+		Rcpp::Named ("bias", b0)
 	);
 		
 	return (rl);
@@ -259,10 +266,9 @@ List lasvmPredictWrapper(
 		v = lasvm_sparsevector_create();
 		Xsv.push_back(v);
 		
-		for (int j = 0; j < x.cols(); j++) {
-			if (x(i, j) != 0)
-				lasvm_sparsevector_set(X[i], j, x(i, j));
-				lasvm_sparsevector_set(Xsv[i], j, x(i,j) );
+		for (int j = 0; j < SV.cols(); j++) {
+			if (SV(i, j) != 0)
+				lasvm_sparsevector_set(Xsv[i], j, SV(i,j) );
 		}
 	}
 	
@@ -277,6 +283,7 @@ List lasvmPredictWrapper(
 	
 	
 	// copy over data 
+	m = 0;
 	for (int i = 0; i < x.rows(); i++) {
 		v = lasvm_sparsevector_create();
 		X.push_back(v);
@@ -297,7 +304,7 @@ List lasvmPredictWrapper(
 	
 	// compute predictions
 	NumericVector predictions (x.rows());
-	for (int i=0;i<m;i++)	{
+	for (int i=0;i < x.rows();i++)	{
 		double y=-b0;
 		
 		for(int j=0;j<msv;j++) {
@@ -311,7 +318,22 @@ List lasvmPredictWrapper(
 		
 		predictions[i] = y;
 	}
+	
+	// free memory
+	for (int i = 0; i < X.size(); i++) {
+		lasvm_sparsevector_destroy(X[i]);
+	}
+	X.clear();
 
+	// free memory
+	for (int i = 0; i < Xsv.size(); i++) {
+		lasvm_sparsevector_destroy(Xsv[i]);
+	}
+	Xsv.clear();
+	
+	x_square.clear();
+	xsv_square.clear();	
+	
 	// return list
 	Rcpp::List rl = Rcpp::List::create (
 		Rcpp::Named ("predictions", predictions)

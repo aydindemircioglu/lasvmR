@@ -337,6 +337,8 @@ void finish(lasvm_t *sv)
     lasvm_get_alpha(sv,svalpha); 
     for(i=0;i<svs;i++) alpha[svind[i]]=svalpha[i];
     b0=lasvm_get_b(sv);
+	delete[] svind;
+	delete[] svalpha;
 }
 
 
@@ -524,6 +526,7 @@ void train_online(char *model_file_name, char *input_file_name)
     //f.close();
     lasvm_destroy(sv);
     lasvm_kcache_destroy(kcache);
+	delete sw;
 }
 
 

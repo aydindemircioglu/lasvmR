@@ -1,17 +1,8 @@
 # lasvmR
 
-lasvmR is a simple wrapper for the K-Means C++ library 
-(see www.tkl.iis.u-tokyo.ac.jp/~ynaga/yakmo/) developed
-by Naoki Yoshinaga.
+lasvmR is a simple wrapper for the LASVM Solver (see http://leon.bottou.org/projects/lasvm). LASVM is basically an online variant of the SMO solver, but citing the original webpage is better:
 
-lasvmR implements orthogonal K-Means. It can work in several rounds.
-In the first round, a normal K-Means is applied to the data.
-In each subsequent round, the next clustering is done on a subspace orthogonal
-to the centroids of the last clustering. This way one produces different
-views on the data.
-To speed up the whole procedure, Greg Hamerlys faster K-Means
-is utilized. Initilization can be done either classically (uniformly random)
-or by using the K-Means++ scheme.
+> LASVM is an approximate SVM solver that uses online approximation. It reaches accuracies similar to that of a real SVM after performing a single sequential pass through the training examples. Further benefits can be achieved using selective sampling techniques to choose which example should be considered next.
 
 
 # Note
