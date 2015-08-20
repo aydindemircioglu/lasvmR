@@ -17,7 +17,30 @@
 #'	cluster 	these are the labels for the resulting clustering (as a std::vector of NumericVector)
 #'	obj			this is a vector with the final objective value for each round
 #'
+NULL
+
+#' lasvmTrain
+#' 
+#' Use lasvm to train a given problem.
+#'
+#'  @param	x		data matrix 
+#'  @param	rounds		number of rounds (orthogonal views)
+#'  @param	k		number of clusters
+#'  @param	iter	numer of iterations in one round
+#'  @param	initType		centroid initialization via Random or KMeans++
+#'  @param	verbose		verbose output?
+#'
+#'  @return	a list consisting of
+#'	centers	these are the resulting centroids of the kmean algorithm (as a std::vector of NumericMatrix)
+#'	cluster 	these are the labels for the resulting clustering (as a std::vector of NumericVector)
+#'	obj			this is a vector with the final objective value for each round
+#'
 lasvmTrainWrapper <- function(x, y, gamma, cost, degree = 3L, coef0 = 0L, optimizer = 1L, kernel = 2L, selection = 0L, termination = 0L, cachesize = 256L, bias = 1L, epochs = 1L, epsilon = 0.001, verbose = FALSE) {
     .Call('lasvmR_lasvmTrainWrapper', PACKAGE = 'lasvmR', x, y, gamma, cost, degree, coef0, optimizer, kernel, selection, termination, cachesize, bias, epochs, epsilon, verbose)
+}
+
+#'
+lasvmPredictWrapper <- function(x, SV, elif, gamma, bias, verbose = FALSE) {
+    .Call('lasvmR_lasvmPredictWrapper', PACKAGE = 'lasvmR', x, SV, elif, gamma, bias, verbose)
 }
 

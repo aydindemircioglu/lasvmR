@@ -28,7 +28,6 @@
 #include <string.h>
 #include <iomanip>
 #include <Rcpp.h>
-
 #include "vector.h"
 
 
@@ -43,11 +42,11 @@ extern vector <lasvm_sparsevector_t*> X; // feature vectors for test set
 // vector <lasvm_sparsevector_t*> Xsv;// feature vectors for SVs
 extern vector <int> Y;                   // labels
 extern vector <double> alpha;            // alpha_i, SV weights
-// extern double b0;                        // threshold
+extern double b0;                        // threshold
 // extern int use_b0;                     // use threshold via constraint \sum a_i y_i =0
 // extern int kernel_type;              // LINEAR, POLY, RBF or SIGMOID kernels
 // extern double degree;
-// extern double kgamma;
+extern double kgamma;
 // extern double coef0; // kernel params
 // extern vector <double> x_square;         // norms of input vectors, used for RBF
 // vector <double> xsv_square;        // norms of test vectors, used for RBF
@@ -61,6 +60,7 @@ void la_svm_parse_command_line (int argc, char **argv, char *input_file_name, ch
 void adapt_data(int msz);
 void train_online(char *model_file_name, char *input_file_name);
 int count_svs();
+double kernel(int i, int j, void *kparam);
 
 
 char *convert(const std::string & s)
@@ -69,6 +69,7 @@ char *convert(const std::string & s)
 	strcpy(pc, s.c_str());
 	return pc; 
 }
+
 
 
 //' lasvmTrain
@@ -197,12 +198,9 @@ List lasvmTrainWrapper(
 				SV (c, p1->index) = p1->data;
 				p1 = p1->next;
 			}
-			Rcout << c << ", ";
 			c++;
 		}
 	}
-	
-	Rcout << "haeh\n";
 	
 	// return list
 	Rcpp::List rl = Rcpp::List::create (
@@ -210,6 +208,85 @@ List lasvmTrainWrapper(
 		Rcpp::Named ("alpha", elif)
 	);
 		
+	return (rl);
+}
+
+
+
+
+//' lasvmTrain
+//' 
+//' Use lasvm to train a given problem.
+//'
+//'  @param	x		data matrix 
+//'  @param	rounds		number of rounds (orthogonal views)
+//'  @param	k		number of clusters
+//'  @param	iter	numer of iterations in one round
+//'  @param	initType		centroid initialization via Random or KMeans++
+//'  @param	verbose		verbose output?
+//'
+//'  @return	a list consisting of
+//'	centers	these are the resulting centroids of the kmean algorithm (as a std::vector of NumericMatrix)
+//'	cluster 	these are the labels for the resulting clustering (as a std::vector of NumericVector)
+//'	obj			this is a vector with the final objective value for each round
+//'
+//; @TODO: support other kernels than RBF
+//'
+// [[Rcpp::export]]
+List lasvmPredictWrapper(
+	Rcpp::NumericMatrix x,
+	Rcpp::NumericMatrix SV,
+	Rcpp::NumericVector elif,
+	double gamma,
+	double bias,
+	bool verbose = false
+)
+{
+	// copy alpha, SVs over to lasvm
+	
+	// copy over data 
+	lasvm_sparsevector_t* v;
+	for (int i = 0; i < x.rows(); i++) {
+		v = lasvm_sparsevector_create();
+		X.push_back(v);
+		
+		for (int j = 0; j < x.cols(); j++) {
+			if (x(i, j) != 0)
+				lasvm_sparsevector_set(X[i], j, x(i, j));
+		}
+	}
+	adapt_data (x.rows());
+	max_index = x.cols();
+	
+	// make sure all needed vars are set
+	// kernel_type
+	// gamma
+	kgamma = gamma;
+	b0 = bias;	
+	
+	// compute predictions
+	NumericVector predictions (x.rows());
+	for (int i=0;i<m;i++)	{
+		double y=-b0;
+		
+		for(int j=0;j<msv;j++) {
+			y+=alpha[j]*kernel(i,j,NULL);
+		}
+
+		if(y>=0) 
+			y=1; 
+		else 
+			y=-1; 
+		
+		predictions[i] = y;
+	}
+
+	// return list
+	Rcpp::List rl = Rcpp::List::create (
+		Rcpp::Named ("predictions", predictions)
+//		Rcpp::Named ("alpha", elif)
+	);
+	
 	return (rl);
 }
 

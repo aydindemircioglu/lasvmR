@@ -10,6 +10,10 @@ using namespace std;
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <Rcpp.h>
+
+using namespace std;
+using namespace Rcpp;
 
 #include "vector.h"
 
@@ -135,71 +139,11 @@ void libsvm_load_sv_data(FILE *fp)
 
 
 int libsvm_load_model(const char *model_file_name)
-// saves the model in the same format as LIBSVM
 {
-    int i;
-
-    FILE *fp = fopen(model_file_name,"r");
-	
-
-    if(fp == NULL)
-    {
-	fprintf(stderr,"Can't open input file \"%s\"\n",model_file_name);
-	exit(1);
-    }
-
-    static char tmp[1001];
-
-    fscanf(fp,"%1000s",tmp); //svm_type
-    fscanf(fp,"%1000s",tmp); //c_svc
-    fscanf(fp,"%1000s",tmp); //kernel_type
-    fscanf(fp,"%1000s",tmp); //rbf,poly,..
-
-    kernel_type=LINEAR;
-    for(i=0;i<4;i++)
-	if (strcmp(tmp,kernel_type_table[i])==0) kernel_type=i;
-
-    if(kernel_type == POLY)
-    {
-	fscanf(fp,"%1000s",tmp); 
-	fscanf(fp,"%lf", &degree);
-    }
-    if(kernel_type == POLY || kernel_type == RBF || kernel_type == SIGMOID)
-    {
-	fscanf(fp,"%1000s",tmp); 
-	fscanf(fp,"%lf",&kgamma);
-    }
-    if(kernel_type == POLY || kernel_type == SIGMOID)
-    {
-	fscanf(fp,"%1000s",tmp); 
-	fscanf(fp,"%lf", &coef0);
-    }
-
-    fscanf(fp,"%1000s",tmp); // nr_class
-    fscanf(fp,"%1000s",tmp); // 2
-    fscanf(fp,"%1000s",tmp); // total_sv
-    fscanf(fp,"%d",&msv); 
-
-    fscanf(fp,"%1000s",tmp); //rho
-    fscanf(fp,"%lf\n",&b0);
-
-    fscanf(fp,"%1000s",tmp); // label
-    fscanf(fp,"%1000s",tmp); // 1
-    fscanf(fp,"%1000s",tmp); // -1
-    fscanf(fp,"%1000s",tmp); // nr_sv
-    fscanf(fp,"%1000s",tmp); // num
-    fscanf(fp,"%1000s",tmp); // num
-    fscanf(fp,"%1000s",tmp); // SV
-	
-    // now load SV data...
-    
-    libsvm_load_sv_data(fp);
-	
-    // finished!
-
-    fclose(fp);
-    return 0;
+	stop ("should never be called directly.");
+	return 0; // make everyone happy
 }
+
 
 double kernel(int i, int j, void *kparam);
 
@@ -207,22 +151,7 @@ double kernel(int i, int j, void *kparam);
 
 void test(char *output_name)
 {	
-    FILE *fp=fopen(output_name,"w");
-    int i,j; double y; double acc=0;
-
-    for(i=0;i<m;i++)
-    {
-	y=-b0;
-	for(j=0;j<msv;j++)
-	{
-	    y+=alpha[j]*kernel(i,j,NULL);
-	}
-	if(y>=0) y=1; else y=-1; 
-	if(((int)y)==Y[i]) acc++; 
-    }
-
-    printf("accuracy= %g (%d/%d)\n",(acc/m)*100,((int)acc),m);
-    fclose(fp);
+	stop ("should never be called directly.");
 }
 
 

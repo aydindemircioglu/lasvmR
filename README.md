@@ -16,19 +16,12 @@ or by using the K-Means++ scheme.
 
 # Note
 
-To circumvent platform-dependent floating point problems, there are some differences to the original yakmo package:
+- Though LASVM works internally with sparse data, the interface to R works with dense matrices and vectors. Therefore data has to be copied over. If this bugs you too much, you are free to open an issue and/or propose a solution.
 
-- The different random number generators are replaced by the R::unif random number generator
-- The projection is rounded to 14 digits precision. 
-
-Therefore the results are not directly comparable to the original yakmo package. As the package is also enforced not to use 
-specific C-compiler flags, compiling is NOT done with the -ffloat-store flag. This means now that different precision is used
-on different platforms (32bit vs 64bit, possibly also linux vs windows). To circumvent that problem and to be somewhat platform-independent the projection is rounded to 14 digits. That might hurt a bit, but hopefully not too much. 
-
+- LASVM is a binary classificator. It does not work with multiclasses and only accepts labels -1, 1.
 
 
 
 # Changelist
 
-- v0.1.1: fix sun solaris build (32bit)
 - v0.1.0: Initial release.

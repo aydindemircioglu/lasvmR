@@ -30,3 +30,19 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// lasvmPredictWrapper
+List lasvmPredictWrapper(Rcpp::NumericMatrix x, Rcpp::NumericMatrix SV, Rcpp::NumericVector elif, double gamma, double bias, bool verbose);
+RcppExport SEXP lasvmR_lasvmPredictWrapper(SEXP xSEXP, SEXP SVSEXP, SEXP elifSEXP, SEXP gammaSEXP, SEXP biasSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type SV(SVSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type elif(elifSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type bias(biasSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    __result = Rcpp::wrap(lasvmPredictWrapper(x, SV, elif, gamma, bias, verbose));
+    return __result;
+END_RCPP
+}
