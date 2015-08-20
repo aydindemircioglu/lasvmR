@@ -149,6 +149,29 @@ double kernel(int i, int j, void *kparam);
 
 
 
+
+double predictKernel(int i, int j, void *kparam)
+{
+	double dot;
+	dot=lasvm_sparsevector_dot_product(X[i],Xsv[j]);
+	
+	// sparse, linear kernel
+	switch(kernel_type)
+	{
+		case LINEAR:
+			return dot; 
+		case POLY:
+			return pow(kgamma*dot+coef0,degree);
+		case RBF:
+			return exp(-kgamma*(x_square[i]+xsv_square[j]-2*dot));    
+		case SIGMOID:
+			return tanh(kgamma*dot+coef0);    
+	}
+	return 0;
+}  
+
+
+
 void test(char *output_name)
 {	
 	stop ("should never be called directly.");

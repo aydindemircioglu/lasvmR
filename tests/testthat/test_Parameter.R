@@ -34,9 +34,7 @@ test_that("walltime works roughly as expected", {
 		verbose = FALSE))
 	
 	expect_less_than (mT[3], 10)
-	
-	# test the same for polynomial kernel
-	
+
 })
 
 

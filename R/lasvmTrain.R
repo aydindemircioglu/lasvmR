@@ -46,7 +46,9 @@
 #'	SV		support vectors as matrix 
 #'
 #' @export
-lasvmTrain = function (x, y, gamma, cost, 
+lasvmTrain = function (x, y, 
+	gamma = 1,
+	cost = 1,
 	 degree = 3,
 	 coef0 = 0,
 	 optimizer = 1,
@@ -69,8 +71,8 @@ lasvmTrain = function (x, y, gamma, cost,
 	checkmate::checkNumber(coef0)
 	checkmate::checkNumber(sample)
 	checkmate::assertCount(optimizer)
-	checkmate::assertCount(kernel)
-	checkmate::assertCount(selection)
+	checkmate::assertInt(kernel, lower = 0, upper = 3)
+	checkmate::assertInt(selection, lower = 0, upper = 2)
 	checkmate::assertCount(termination)
 	checkmate::assertCount(cachesize)
 	checkmate::assertCount(bias)
@@ -78,7 +80,9 @@ lasvmTrain = function (x, y, gamma, cost,
 	checkmate::checkNumber(epsilon)
 	checkmate::assertFlag (verbose)
 
-	model = lasvmTrainWrapper (x, y, gamma, cost, 
+	model = lasvmTrainWrapper (x, y, 
+		gamma = gamma, 
+		cost = cost,
 		degree = 	 degree,
 		coef0 = 	 coef0,
 		optimizer = 	 optimizer,

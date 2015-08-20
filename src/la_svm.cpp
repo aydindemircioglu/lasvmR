@@ -101,7 +101,7 @@ char report_file_name[1024];             // filename for the training report
 char split_file_name[1024]="\0";         // filename for the splits
 int cache_size=256;                       // 256Mb cache size as default
 double epsgr=1e-3;                       // tolerance on gradients
-long long kcalcs=0;                      // number of kernel evaluations
+size_t kcalcs=0;                      // number of kernel evaluations
 int binary_files=0;
 vector <ID> splits;             
 int max_index=0;
@@ -204,9 +204,6 @@ void la_svm_parse_command_line(int argc, char **argv, char *input_file_name, cha
 }
 
 
-
-
-
 int split_file_load(char *f)
 {
 	stop ("should never be called directly.");
@@ -220,6 +217,7 @@ int libsvm_load_data(char *filename)
 	stop ("should never be called directly.");
 	return 0; // make everyone happy
 }
+
 
 int binary_load_data(char *filename)
 {
@@ -253,7 +251,55 @@ void adapt_data(int msz)
 }
 
 
+
 int sv1,sv2; double max_alpha,alpha_tol;
+
+void resetVars() {
+	
+	/* Data and model */
+	m=0;                          // training set size
+	X.clear(); // feature vectors
+	Y.clear();                   // labels
+	kparam.clear();           // kernel parameters
+	alpha.clear();            // alpha_i, SV weights
+	b0 = 1;                        // threshold
+	
+	/* Hyperparameters */
+	kernel_type=RBF;              // LINEAR, POLY, RBF or SIGMOID kernels
+	degree=3;
+	kgamma=-1;
+	coef0=0;// kernel params
+	use_b0=1;                     // use threshold via constraint \sum a_i y_i =0
+	selection_type=RANDOM;        // RANDOM, GRADIENT or MARGIN selection strategies
+	optimizer=ONLINE_WITH_FINISHING; // strategy of optimization
+	C=1;                       // C, penalty on errors
+	C_neg=1;                   // C-Weighting for negative examples
+	C_pos=1;                   // C-Weighting for positive examples
+	epochs=1;                     // epochs of online learning
+	candidates=50;				  // number of candidates for "active" selection process
+	deltamax=1000;			  // tolerance for performing reprocess step, 1000=1 reprocess only
+	select_size.clear();      // Max number of SVs to take with selection strategy (for early stopping) 
+	x_square.clear();         // norms of input vectors, used for RBF
+	
+	/* Programm behaviour*/
+	verbosity=0;                  // verbosity level, 0=off
+	saves=1;
+	cache_size=256;                       // 256Mb cache size as default
+	epsgr=1e-3;                       // tolerance on gradients
+	kcalcs=0;                      // number of kernel evaluations
+	binary_files=0;
+	splits.clear();             
+	max_index=0;
+	iold.clear();
+	inew.clear();		  // sets of old (already seen) points + new (unseen) points
+	termination_type=0;
+	sv1 = 0;
+	sv2 = 0;
+	max_alpha = 0;
+	alpha_tol = 0;
+}	
+
+
 
 int count_svs()
 {
@@ -320,7 +366,8 @@ void finish(lasvm_t *sv)
 
     if (optimizer==ONLINE_WITH_FINISHING)
     {
-        Rcout << "..[finishing]";
+		if (verbosity > 0)
+			Rcout << "..[finishing]";
      
         int iter=0;
 
@@ -369,6 +416,7 @@ int select(lasvm_t *sv) // selection strategy
     int t,i,r,j;
     double tmp,best; int ind=-1;
 
+// 	std::cout << "SEL--\n";
     switch(selection_type)
     {
     case RANDOM:   // pick a random candidate
@@ -376,18 +424,29 @@ int select(lasvm_t *sv) // selection strategy
         break;
 
     case GRADIENT: // pick best gradient from 50 candidates
-        j=candidates; if((int)inew.size()<j) j=inew.size();
+// 		std::cout << "GR ";
+        j=candidates; 
+		if ((int)inew.size()<j) 
+			j=inew.size();
 		r=R::runif (0,inew.size());
+// 		std::cout << r << "/" << inew.size() << "\n";
         s=r;
-        best=1e20;
+        best=1e60; //?
         for(i=0;i<j;i++)
         {
+// 			std::cout << "t, s:" << s;
             r=inew[s];
-            tmp=lasvm_predict(sv, r);  
+// 			std::cout << "r=" << r;
+			tmp=lasvm_predict(sv, r);  
             tmp*=Y[r];
-            //printf("%d: example %d   grad=%g\n",i,r,tmp);
-            if(tmp<best) {best=tmp;ind=s;}
+//             printf("\n%d: example %d   grad=%g\n",i,r,tmp);
+            if (tmp<best) {
+// 				std::cout << "*";
+				best=tmp;
+				ind=s;
+			}
         	s=R::runif (0,inew.size());
+// 			std::cout << "ns:" << s;
 		}  
         s=ind;
         break;
@@ -396,7 +455,7 @@ int select(lasvm_t *sv) // selection strategy
         j=candidates; if((int)inew.size()<j) j=inew.size();
 		r=R::runif (0,inew.size());
         s=r;
-        best=1e20;
+        best=1e60;
         for(i=0;i<j;i++)
         {
             r=inew[s];
@@ -409,14 +468,15 @@ int select(lasvm_t *sv) // selection strategy
         s=ind;
         break;
     }
-	
+// 	std::cout << "s " << s << "\n";
+// 	std::cout << "size: " << inew.size() << "\n";
     t=inew[s]; 
     inew[s]=inew[inew.size()-1];
     inew.pop_back();
     iold.push_back(t);
 	
     //printf("(%d %d)\n",iold.size(),inew.size());
-
+// 	std::cout << "F\n";
     return t;
 }
 
@@ -431,9 +491,9 @@ void train_online(char *model_file_name, char *input_file_name)
     strcpy(t,model_file_name);
     strcat(t,".time");
     	
-    lasvm_kcache_t *kcache=lasvm_kcache_create(kernel, NULL);
-    lasvm_kcache_set_maximum_size(kcache, cache_size*1024*1024);
-    lasvm_t *sv=lasvm_create(kcache,use_b0,C*C_pos,C*C_neg);
+    lasvm_kcache_t *kcache = lasvm_kcache_create(kernel, NULL);
+    lasvm_kcache_set_maximum_size (kcache, cache_size*1024*1024);
+    lasvm_t *sv = lasvm_create (kcache, use_b0, C*C_pos, C*C_neg);
 	if (verbosity > 0)
 		Rcout << "set cache size to " << cache_size << "\n";
 
@@ -452,6 +512,9 @@ void train_online(char *model_file_name, char *input_file_name)
     for(j=0;j<epochs;j++)
     {
 		Rcpp::checkUserInterrupt();
+		int steps = 10;
+		if (m < 2*steps)
+			steps = m;
 		for(i=0;i<m;i++)
         {
 			if(inew.size()==0) break; // nothing more to select
@@ -464,12 +527,13 @@ void train_online(char *model_file_name, char *input_file_name)
                 //printf("%g %g\n",lasvm_get_delta(sv),deltamax);
                 t2=lasvm_reprocess(sv,epsgr);// at least one call to reprocess
 				// actally this does not work with multiple times, and we do not intent to anyway.
-				if (i % (m/10) == 1) 
+				//std::cout << "i=" << i << "  m=" << m << "  m/10=" << m/10 << "\n";
+				if (i % steps == 1) 
 				{
 					if (termination_type==TIME && sw->get_time()>=select_size[0])
 					{
-						finish(sv); // if haven't done any intermediate saves, do final save
-						return;
+						// goto is completely underrated. please do more gotos.
+						goto goto80;
 					}
 				}	
 				while (lasvm_get_delta(sv)>deltamax && deltamax<1000)
@@ -506,6 +570,7 @@ void train_online(char *model_file_name, char *input_file_name)
         for(i=0;i<m;i++) inew.push_back(i);
     }
 
+goto80: 
     if(saves<2) 
     {
         finish(sv); // if haven't done any intermediate saves, do final save
@@ -513,11 +578,14 @@ void train_online(char *model_file_name, char *input_file_name)
         //f << m << " " << count_svs() << " " << kcalcs << " " << timer << endl;
     }
 
-    if(verbosity>0) Rcout << "\n";
-    l=count_svs(); 
-    Rcout << "nSVs=" << l << "\n";
-	Rcout << "||w||^2=" << lasvm_get_w2(sv) << "\n";
-	Rcout << "kcalcs=" << kcalcs << endl;
+    if(verbosity>0) {
+		Rcout << "\n";
+		l=count_svs(); 
+		Rcout << "nSVs=" << l << "\n";
+		Rcout << "||w||^2=" << lasvm_get_w2(sv) << "\n";
+		Rcout << "kcalcs=" << kcalcs << endl;
+	}
+	
     //f.close();
     lasvm_destroy(sv);
     lasvm_kcache_destroy(kcache);

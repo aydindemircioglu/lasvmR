@@ -51,9 +51,9 @@ extern vector <double> alpha;            // alpha_i, SV weights
 extern double b0;                        // threshold
 // extern int use_b0;                     // use threshold via constraint \sum a_i y_i =0
 extern int kernel_type;              // LINEAR, POLY, RBF or SIGMOID kernels
-// extern double degree;
+extern double degree;
 extern double kgamma;
-// extern double coef0; // kernel params
+extern double coef0; // kernel params
 extern vector <double> x_square;         // norms of input vectors, used for RBF
 extern vector <double> xsv_square;        // norms of test vectors, used for RBF
 // extern char split_file_name[1024];         // filename for the splits
@@ -62,11 +62,15 @@ extern vector <double> xsv_square;        // norms of test vectors, used for RBF
 extern int max_index;
 extern double alpha_tol;
 
+
+
 void la_svm_parse_command_line (int argc, char **argv, char *input_file_name, char *model_file_name);
 void adapt_data(int msz);
 void train_online(char *model_file_name, char *input_file_name);
 int count_svs();
 double kernel(int i, int j, void *kparam);
+double predictKernel(int i, int j, void *kparam);
+void resetVars();	
 
 
 char *convert(const std::string & s)
@@ -124,6 +128,8 @@ List lasvmTrainWrapper(
 	bool verbose = false
 )
 {
+	resetVars();
+	
 	// 	-wi weight: set the parameter C of class i to weight*C (default 1)
 	std::vector<std::string>  vec;
 	
@@ -194,6 +200,7 @@ List lasvmTrainWrapper(
 	
 	
 	// now start training
+	m = x.rows();
 	train_online(model_file_name, input_file_name);
 	
 	if (verbose == TRUE)
@@ -329,7 +336,7 @@ List lasvmPredictWrapper(
 		double y=-b0;
 		
 		for(int j=0;j<msv;j++) {
-			y+=alpha[j]*kernel(i,j,NULL);
+			y+=alpha[j] * predictKernel (i,j,NULL);
 		}
 
 		if(y>=0) 
