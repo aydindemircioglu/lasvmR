@@ -17,7 +17,7 @@
 #'	cluster 	these are the labels for the resulting clustering (as a std::vector of NumericVector)
 #'	obj			this is a vector with the final objective value for each round
 #'
-lasvmTrain <- function(x, y, gamma, cost, degree = 3L, coef0 = 0L, optimizer = 1L, kernel = 2L, selection = 0L, termination = 0L, cachesize = 256L, bias = 1L, epochs = 1L, epsilon = 0.001, verbose = FALSE) {
-    .Call('lasvmR_lasvmTrain', PACKAGE = 'lasvmR', x, y, gamma, cost, degree, coef0, optimizer, kernel, selection, termination, cachesize, bias, epochs, epsilon, verbose)
+lasvmTrainWrapper <- function(x, y, gamma, cost, degree = 3L, coef0 = 0L, optimizer = 1L, kernel = 2L, selection = 0L, termination = 0L, cachesize = 256L, bias = 1L, epochs = 1L, epsilon = 0.001, verbose = FALSE) {
+    .Call('lasvmR_lasvmTrainWrapper', PACKAGE = 'lasvmR', x, y, gamma, cost, degree, coef0, optimizer, kernel, selection, termination, cachesize, bias, epochs, epsilon, verbose)
 }
 

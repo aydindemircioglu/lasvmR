@@ -14,6 +14,7 @@ using namespace std;
 #include <Rcpp.h>
 using namespace Rcpp;
 
+
 #include "vector.h"
 #include "lasvm.h"
 
@@ -52,7 +53,7 @@ private:
 stopwatch::~stopwatch()
 {
     clock_t total = clock()-start; //get elapsed time
-    cout<<"Time(secs): "<<double(total)/CLOCKS_PER_SEC<<endl;
+    Rcout<<"Time(secs): "<<double(total)/CLOCKS_PER_SEC<<endl;
 }
 class ID // class to hold split file indices and labels
 {
@@ -186,7 +187,7 @@ void la_svm_parse_command_line(int argc, char **argv, char *input_file_name, cha
             termination_type = atoi(argv[i]);
             break;
         default:
-            stop ("unknown command line option\n";
+            stop ("unknown command line option\n");
             exit_with_help();
         }
     }
@@ -206,37 +207,8 @@ void la_svm_parse_command_line(int argc, char **argv, char *input_file_name, cha
 
 int split_file_load(char *f)
 {
-    int binary_file=0,labs=0,inds=0;
-    FILE *fp;
-    fp=fopen(f,"r"); 
-    if(fp==NULL) {
-		stop ("couldn't load split file: ", f);
-	}
-    char dummy[100],dummy2[100];
-    unsigned int i,j=0; for(i=0;i<strlen(f);i++) if(f[i]=='/') j=i+1;
-    fscanf(fp,"%s %s",dummy,dummy2);
-    strcpy(&(f[j]),dummy2);
-    fscanf(fp,"%s %d",dummy,&binary_file);
-    fscanf(fp,"%s %d",dummy,&inds);
-    fscanf(fp,"%s %d",dummy,&labs);
-    Rcout << "[split file: load: binary:  new_indices: new_labels: ]\n"; // ,dummy2,binary_file,inds,labs);
-    //printf("[split file:%s binary=%d]\n",dummy2,binary_file);
-    if(!inds) return binary_file;
-    while(1)
-    {
-        int i,j;
-        int c=fscanf(fp,"%d",&i);
-        if(labs) c=fscanf(fp,"%d",&j);
-        if(c==-1) break;
-        if (labs) 
-            splits.push_back(ID(i-1,j)); 
-        else 
-            splits.push_back(ID(i-1,0));
-    }
-
-    sort(splits.begin(),splits.end());
-	
-    return binary_file;
+	stop ("should never be called directly.");
+	return 0; // make everyone happy
 }
 
 
@@ -257,7 +229,6 @@ int binary_load_data(char *filename)
 void load_data_file(char *filename)
 {
 	stop ("should never be called directly.");
-	return 0; // make everyone happy
 }
 
 
@@ -512,8 +483,12 @@ void train_online(char *model_file_name, char *input_file_name)
                 Rcout << "l=" << l << " process=" << t1 << " reprocess=" << t2 << "\n";
             }
             else
-                if(verbosity==1)
-                    if( (i%100)==0){ Rcout << ".." << i; fflush(stdout); }
+                if(verbosity==1) {
+                    if( (i%100)==0) { 
+						Rcout << ".." << i << flush; 
+						Rcpp::checkUserInterrupt();
+					}
+				}
             
             l=(int) lasvm_get_l(sv);
             for(k=0;k<(int)select_size.size();k++)
@@ -522,7 +497,9 @@ void train_online(char *model_file_name, char *input_file_name)
                        || (termination_type==SVS && l>=select_size[k])
                        || (termination_type==TIME && sw->get_time()>=select_size[k])
 					   || (termination_type==FULLTIME && sw->get_time()>=select_size[k])
-				)
+				) {
+					// correct me
+				}
 			 
             }
             if(select_size.size()==0) break; // early stopping, all intermediate models saved
@@ -542,7 +519,7 @@ void train_online(char *model_file_name, char *input_file_name)
     if(verbosity>0) Rcout << "\n";
     l=count_svs(); 
     Rcout << "nSVs=" << l << "\n";
-	Rcout << "||w||^2=" << lasvm_get_w2(sv) >> "\n";
+	Rcout << "||w||^2=" << lasvm_get_w2(sv) << "\n";
 	Rcout << "kcalcs=" << kcalcs << endl;
     //f.close();
     lasvm_destroy(sv);

@@ -29,6 +29,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <Rcpp.h>
+using namespace Rcpp;
 
 #include "messages.h"
 
@@ -40,8 +42,10 @@ lasvm_message_proc_t  *lasvm_message_proc = 0;
 static void 
 defaultproc(lasvm_message_t level, const char *fmt, va_list ap)
 {
-  if (level <= lasvm_message_level)
-    vprintf(fmt, ap);
+	if (level <= lasvm_message_level) {
+		// fix this some day
+		Rcout << fmt << " " << ap << "\n";
+	}
 #ifdef LUSH
   if (level <= LASVM_ERROR)
     {
@@ -50,7 +54,7 @@ defaultproc(lasvm_message_t level, const char *fmt, va_list ap)
     }
 #endif
   if (level <= LASVM_ERROR)
-    abort();
+    stop("error.");
 }
 
 void 
@@ -63,7 +67,7 @@ lasvm_error(const char *fmt, ...)
     f = defaultproc;
   (*f)(LASVM_ERROR,fmt,ap);
   va_end(ap); 
-  abort();
+  stop("error.");
 }
 
 void 

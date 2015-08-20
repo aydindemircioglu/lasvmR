@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2015  Aydin Demircioglu, aydin.demircioglu /at/ ini.rub.de
 //
-// This file is part of the yakmoR library for GNU R.
+// This file is part of the lasvmR library for GNU R.
 // It is made available under the terms of the GNU General Public
 // License, version 2, or at your option, any later version,
 // incorporated herein by reference.
@@ -88,7 +88,7 @@ char *convert(const std::string & s)
 //'	obj			this is a vector with the final objective value for each round
 //'
 // [[Rcpp::export]]
-List lasvmTrain(
+List lasvmTrainWrapper(
 	Rcpp::NumericMatrix x,
 	Rcpp::NumericVector y,
 	double gamma,
