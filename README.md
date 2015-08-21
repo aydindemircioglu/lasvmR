@@ -11,6 +11,8 @@ lasvmR is a simple wrapper for the LASVM Solver (see http://leon.bottou.org/proj
 
 - LASVM is a binary classificator. It does not work with multiclasses and only accepts labels -1, 1.
 
+- Large degree polynomial kernel will kill the computation of the gradient, so LASVM will have floating point issues and crash. Be aware that this might not be the only problem. To see this for yourself, call extra/crash.R or use LASVM directly via 'la_svm -t 1 -s 1 -c 30000 -d 60 crash.data ./crash.model' with crash.R and crash.data from the github repository.
+
 
 
 # Changelist

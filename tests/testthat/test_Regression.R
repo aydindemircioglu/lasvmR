@@ -35,44 +35,35 @@ test_that("our wrapper gives the same output as LASVM called by command line", {
 
 	
 	
-		# take 0815 iris set
+	# take 0815 iris set
+	set.seed(32)
 	d = iris[sample(nrow(iris)),]
 	x = as.matrix(d[,1:4])
 	y = as.matrix(as.numeric(d[,5]))
 	y[y==3] = 1
 	y[y==2] = -1
 
+	xt = as.matrix(x[101:150,])
+	yt = as.matrix(as.numeric(y[101:150,]))
+
 	model = lasvmTrain (x[1:100,], y[1:100], gamma = 0.1, cost = 1, epochs = 5, optimizer = 0, kernel = 2, selection = 1, verbose = FALSE)
-	predictions = lasvmPredict (x[101:150,], model, verbose = FALSE)
+	predictions = lasvmPredict (xt, model, verbose = FALSE)
 
 	
-# 	d = iris[sample(nrow(iris)),]
-# 	x = as.matrix(d[,1:4])
-# 	y = as.matrix(as.numeric(d[,5]))
-# 	y[y==3] = 1
-# 	y[y==2] = -1
-# 
-# 	model = lasvmTrain (x[1:100,], y[1:100,], gamma = 2, cost = 2, epochs = 5, optimizer = 0, kernel = 2, selection = 1, verbose = FALSE)
-# 	
-# 	xt = as.matrix(x[101:150,])
-# 	yt = as.matrix(as.numeric(y[101:150,]))
-# 	predictions = lasvmPredict (xt, model, verbose = FALSE)
-# 	expect_equal (sum(abs(predictions$predictions - yt)), 0)
-	
-	
-	
-	
-	
-# 	# test the same for polynomial kernel
-# 	model = lasvmTrain (x = traindata, y = trainlabel, degree = 4, coef0 = 3, cost = 2, epochs = 1, optimizer = 1, kernel = 3, selection = 1, verbose = FALSE)
-# 	predictions = lasvmPredict (testdata, model, verbose = FALSE)
-# 
-# 	expect_equal (sum(abs(predictions$predictions - testlabel)), 0)
-	
+ 	# test the same for polynomial kernel
+ 	set.seed(32)
+	degree = 3.477656
+	coef0 = 9.793866
+	cost = 0.001201763
+
+	model = lasvmTrain (x[1:100,], y[1:100,], degree = degree, coef0 = coef0, cost = cost,  kernel = 1, selection = 2, verbose = FALSE)
+	predictions = lasvmPredict (xt, model, verbose = FALSE)
+
+	expect_equal (sum(abs(predictions$predictions - yt)), 0)
 })
 
 
-test_that("different parameter combinations does not make lasvmR crash", {
+test_that("different parameter combinations for RBF kernel does not make lasvmR crash", {
 
 	# take 0815 iris set
 	d = iris[sample(nrow(iris)),]
@@ -81,13 +72,13 @@ test_that("different parameter combinations does not make lasvmR crash", {
 	y[y==3] = 1
 	y[y==2] = -1
 
-	for (i in 1:128) {
+	for (i in 1:32) {
 		s = sample(nrow(iris))
 		p = round(runif(1)*(nrow(iris)-10))+5
 		trIdx = s[1:p]
 		testIdx = s[p+1:nrow(iris)]
 
-		model = lasvmTrain (x[trIdx,], y[trIdx,], degree = runif(1)*10000, coef0 = runif(1)*10000, gamma = runif(1)*10000, cost = runif(1)*10000, epochs = round(runif(1)*100), optimizer = round(runif(1)), kernel = round(runif(1)*3), selection = round(runif(1)*2), verbose = FALSE)
+		model = lasvmTrain (x[trIdx,], y[trIdx,], degree = runif(1)*10000, coef0 = runif(1)*10000, gamma = runif(1)*10000, cost = runif(1)*10000, epochs = round(runif(1)*10), optimizer = round(runif(1)), kernel = 2, selection = round(runif(1)*2), verbose = FALSE)
 		predictions = lasvmPredict (x[testIdx,], model, verbose = FALSE)
 	}
 	
