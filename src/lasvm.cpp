@@ -29,7 +29,6 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
-#include <iostream>
 
 #include "messages.h"
 #include "kcache.h"
@@ -627,9 +626,7 @@ double
 lasvm_predict(lasvm_t *self, int xi)
 {
   int l = self->l;
-  std::cout << "l = " << l << "\n";
   float *row = lasvm_kcache_query_row(self->kernel, xi, l);
-  std::cout << "xi = " << xi << "\n";
   real_t *alpha = self->alpha;
   real_t s = 0;
   if (self->sumflag)
@@ -639,16 +636,12 @@ lasvm_predict(lasvm_t *self, int xi)
 #else
   {
     int j;
-    for (j=0; j<l; j++) {
+    for (j=0; j<l; j++)
       s += alpha[j] * row[j];
-		std::cout << "s += " << alpha[j] << "*" << row[j] << "\n";
-	}
-	std::cout << "s = " << s << "\n";
   }
 #endif
   if (self->sumflag)
     s += (self->gmin + self->gmax) / 2;
-  std::cout << "fin s = " << s << "\n";
   return s;
 }
 
