@@ -151,6 +151,7 @@ int la_test_main(int argc, char **argv)
     load_data_file(input_file_name); // load test data
     
     test(output_file_name);
+	return (-1);
 }
 
 

@@ -604,6 +604,6 @@ int la_svm_main (int argc, char **argv)
     train_online(model_file_name, input_file_name);
     
     libsvm_save_model(model_file_name);
-   
+	return (-1);
 }
 

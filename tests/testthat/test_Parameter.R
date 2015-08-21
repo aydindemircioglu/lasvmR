@@ -1,3 +1,4 @@
+library (lasvmR)
 context("LASVM Parametertest")	
 
 

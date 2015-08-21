@@ -1,4 +1,5 @@
-context("LASVM Regressiontest")	
+library (lasvmR)
+context ("LASVM Regressiontest")	
 
 
 test_that("our wrapper gives the same output as LASVM called by command line", {
