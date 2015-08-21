@@ -46,6 +46,17 @@
 #'	alpha		alpha for SVs as vector
 #'	SV		support vectors as matrix 
 #'
+#' @examples
+#' model = lasvmR::lasvmTrain (x = as.matrix(iris[seq(1,150,2),1:4]),
+#' 	y = (as.numeric(iris[seq(1,150,2),5]) %% 2)*2-1,
+#' 	gamma = 1, 
+#' 	cost = 1, 
+#' 	kernel = 2)
+#' ytrue = (as.numeric(iris[seq(2,150,2),5]) %% 2)*2-1
+#' result = lasvmPredict (x = as.matrix(iris[seq(2,150,2),1:4]), model)
+#' ypred = result$predictions
+#' error = sum(abs(ypred - ytrue))/length(ytrue)
+#' cat ("Error rate =", error*100)
 #' @export
 lasvmTrain = function (x, y, 
 	gamma = 1,
