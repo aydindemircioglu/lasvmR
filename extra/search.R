@@ -17,10 +17,10 @@ model = lasvmTrain (x[1:100,], y[1:100], gamma = 0.1, cost = 1, epochs = 5, opti
 predictions = lasvmPredict (xt, model, verbose = FALSE)
 
 
-set.seed(32)
 
 # test the same for polynomial kernel
 error = 1
+	set.seed(21)
 while (error != 0) {
 	degree = runif(1)*12
 	coef0 = runif(1)*300
@@ -35,9 +35,6 @@ while (error != 0) {
 	print (degree)
 	print (coef0)
 	print (cost)
-	degree = 3.477656
-	coef0 = 9.793866
-	cost = 0.001201763
 	
 	model = lasvmTrain (x[1:100,], y[1:100,], degree = degree, coef0 = coef0, cost = cost, kernel = 1, selection = 2, verbose = FALSE)
 	predictions = lasvmPredict (xt, model, verbose = FALSE)

@@ -52,9 +52,9 @@ test_that("our wrapper gives the same output as LASVM called by command line", {
 	
  	# test the same for polynomial kernel
  	set.seed(32)
-	degree = 3.477656
-	coef0 = 9.793866
-	cost = 0.001201763
+	degree = 3.5
+	coef0 = 8.86
+	cost = 0.001
 
 	model = lasvmTrain (x[1:100,], y[1:100,], degree = degree, coef0 = coef0, cost = cost,  kernel = 1, selection = 2, verbose = FALSE)
 	predictions = lasvmPredict (xt, model, verbose = FALSE)
