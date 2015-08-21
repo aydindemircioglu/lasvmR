@@ -97,17 +97,17 @@ char *convert(const std::string & s)
 //'   @param  kernel 	kernel type
 //'   @param  selection 	selection strategy
 //'   @param  termination 	criterion for stopping
+//'   @param	sample	parameter for stopping criterion, e.g. seconds
 //'   @param  cachesize 	size of kernel cache
-//'   @param  bias 	use  bias?
+//'   @param  bias		use  bias?
 //'   @param  epochs 	number of epochs
 //'   @param epsilon 	stopping criterion parameter
 //'   @param	verbose		verbose output?
 //'
 //'  @return	a list consisting of
-//'	centers	these are the resulting centroids of the kmean algorithm (as a std::vector of NumericMatrix)
-//'	cluster 	these are the labels for the resulting clustering (as a std::vector of NumericVector)
-//'	obj			this is a vector with the final objective value for each round
-//'
+//'	SV		matrix of support vectors
+//'	alpha		vector of alpha coefficients
+//'	bias		bias term
 // [[Rcpp::export]]
 List lasvmTrainWrapper(
 	Rcpp::NumericMatrix x,
@@ -255,15 +255,14 @@ List lasvmTrainWrapper(
 //'  @param	SV		matrix of support vectors
 //'  @param	elif		vector of alphas
 //'  @param	gamma		gamma of RBF kernel 
-//'  @param	degree	degree for POLY kernel
-//'  @param	coef0		coef0 for kernel
+//'  @param	kdegree	degree for POLY kernel
+//'  @param	kcoef0		coef0 for kernel
 //'  @param	bias		bias term
+//'  @param	kerneltype		type of kernel to use
 //'  @param	verbose		verbose output?
 //'
 //'  @return	a list consisting of
 //'	predictions		just the predictions
-//'
-//; @TODO: support other kernels than RBF
 //'
 // [[Rcpp::export]]
 List lasvmPredictWrapper(

@@ -27,7 +27,8 @@
 #'
 #'  @param	x		data matrix 
 #'  @param y		labels
-#'
+#'  @param  gamma		RBF kernel parameter
+#'  @param  cost		regularization parameter
 #'  @param  degree 	degree for poly kernel
 #'  @param  coef0 	coefficient for poly kernel
 #'  @param  optimizer 	type of optimizer

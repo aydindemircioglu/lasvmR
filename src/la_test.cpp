@@ -86,53 +86,7 @@ void load_data_file(char *filename);
 void libsvm_load_sv_data(FILE *fp)
 // loads the same format as LIBSVM
 { 
-    int max_index; int oldindex=0;
-    int index; double value; int i;
-    lasvm_sparsevector_t* v;
-    
-    alpha.resize(msv);
-    for(i=0;i<msv;i++)
-    {
-	v=lasvm_sparsevector_create();
-	Xsv.push_back(v); 
-    }
-    
-    max_index = 0;
-    for(i=0;i<msv;i++)
-    {
-	double label;
-	fscanf(fp,"%lf",&label);
-	//printf("%d:%g\n",i,label);
-	alpha[i] = label;
-	while(1)
-	{
-	    int c;
-	    do {
-		c = getc(fp);
-		if(c=='\n') goto out2;
-	    } while(isspace(c));
-	    ungetc(c,fp);
-	    fscanf(fp,"%d:%lf",&index,&value);
-	    if(index!=oldindex)
-	    {
-		lasvm_sparsevector_set(Xsv[i],index,value);
-	    }
-	    oldindex=index;
-	    if (index>max_index) max_index=index;
-	}	
-    out2:
-	label=1; // dummy
-    }
-    
-    printf("loading model: %d svs\n",msv);
-    
-    if(kernel_type==RBF)
-    {
-    	xsv_square.resize(msv);
-    	for(i=0;i<msv;i++)
-    	    xsv_square[i]=lasvm_sparsevector_dot_product(Xsv[i],Xsv[i]);
-    }
-    
+	stop ("should never be called directly.");
 }
 
 
@@ -180,59 +134,13 @@ void test(char *output_name)
 
 void la_test_parse_command_line(int argc, char **argv, char *input_file_name, char *model_file_name, char *output_file_name)
 {
-    int i; 
-    
-    // parse options
-    for(i=1;i<argc;i++)
-    {
-	if(argv[i][0] != '-') break;
-	++i;
-	switch(argv[i-1][1])
-	{
-	case 'B':
-	    binary_files=atoi(argv[i]);
-	    break;
-	default:
-	    fprintf(stderr,"unknown option\n");
-	    exit_with_help();
-	}
-    }
-
-    // determine filenames
-
-    if(i>=argc)
-	exit_with_help();
-
-    strcpy(input_file_name, argv[i]);
-
-    if(i<argc-1)
-	strcpy(model_file_name,argv[i+1]);
-    else
-    {
-	char *p = strrchr(argv[i],'/');
-	if(p==NULL)
-	    p = argv[i];
-	else
-	    ++p;
-	sprintf(model_file_name,"%s.model",p);
-    }
-
-    if(argc<i+3) exit_with_help();
-
-    strcpy(input_file_name, argv[i]);
-    strcpy(model_file_name, argv[i+1]);
-    strcpy(output_file_name, argv[i+2]);
-
+	stop ("should never be called directly.");
 }
 
 
 
 int la_test_main(int argc, char **argv)  
 {
-
-    printf("\n");
-    printf("la test\n");
-    printf("_______\n");
     
     char input_file_name[1024];
     char model_file_name[1024];

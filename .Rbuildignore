@@ -28,3 +28,5 @@ testinfo.RData
 R/..Rcheck
 .git
 cran-comments.md
+compile.R
+compile.R

@@ -26,10 +26,7 @@
 #' Use lasvm to train a given problem.
 #'
 #'  @param	x		data matrix 
-#'  @param SV		support vectors
-#'  @param elif		alpha vector
-#'  @param gamma		gamma for RBFF kernel
-#'  @param bias		bias term
+#'  @param model		trained model
 #'  @param	verbose		verbose output?
 #'
 #'  @return	a list consisting of
