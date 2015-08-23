@@ -1,7 +1,3 @@
-## Submission
-This is a resubmission. In this version I have:
-
-
 
  
 ## Test environments
@@ -14,7 +10,13 @@ This is a resubmission. In this version I have:
 
 ## R CMD check results
 
-Status: OK
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘Aydin Demircioglu <aydin.demircioglu@ini.rub.de>’
+New submission
+
+Status: 1 NOTE
+
+To be expected for the first version of a package.
 
 
 

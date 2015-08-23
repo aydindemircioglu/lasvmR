@@ -291,6 +291,7 @@ List lasvmPredictWrapper(
 	}
 	
 	// copy alpha over to lasvm
+	alpha.resize(elif.size());
 	alpha.clear();
 	std::copy (elif.begin(), elif.end(), alpha.begin());
 
