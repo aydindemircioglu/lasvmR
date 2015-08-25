@@ -17,4 +17,5 @@ lasvmR is a simple wrapper for the LASVM Solver (see http://leon.bottou.org/proj
 
 # Changelist
 
+- v0.1.1: Remove memory bug and compile warnings.
 - v0.1.0: Initial release.

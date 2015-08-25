@@ -1,4 +1,13 @@
 
+## Resubmission
+
+This is a resubmission in which I tried to 
+
+- remove the (apparent) memory bug. Alas i was not able to reproduce it on any of my environments 
+(incl. e.g. R-devel from svn, compiled with ASAN and working sanitizers::stackAddressSanitize(1)). 
+
+- remove a few clang compile warnings.
+
  
 ## Test environments
 * local ubuntu 15.10 alpha2 install (64bit), R 3.2.1
