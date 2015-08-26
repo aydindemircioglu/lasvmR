@@ -2,7 +2,7 @@ Package: lasvmR
 Type: Package
 Title: A Simple Wrapper for the LASVM Solver
 Version: 0.1.1
-Date: 2015-08-24
+Date: 2015-08-26
 Author: Aydin Demircioglu
 Maintainer: Aydin Demircioglu <aydin.demircioglu@ini.rub.de>
 Description: This is a simple wrapper for the LASVM Solver (see http://leon.bottou.org/projects/lasvm). LASVM is basically an online variant of the SMO solver. 
