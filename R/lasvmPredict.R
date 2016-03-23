@@ -25,12 +25,13 @@
 #' 
 #' Use lasvm to train a given problem.
 #'
-#'  @param	x		data matrix 
-#'  @param model		trained model
-#'  @param	verbose		verbose output?
-#'
-#'  @return	a list consisting of
-#'	predictions		the predicted labels
+#' @param x
+#' @param model trained model
+#' @param verbose
+#' @param probability Logical indicating whether class probabilities
+#'     should be computed and returned. need yTrain.
+#' @param yTrain label in training dataset
+#' @return a list consisting of predictions the predicted labels
 #'
 #' @examples
 #' model = lasvmR::lasvmTrain (x = as.matrix(iris[seq(1,150,2),1:4]),
@@ -44,7 +45,7 @@
 #' error = sum(abs(ypred - ytrue))/length(ytrue)
 #' cat ("Error rate =", error*100)
 #' @export
-lasvmPredict = function (x, model, verbose = FALSE)
+lasvmPredict = function (x, model, verbose = FALSE, probability = FALSE, yTrain = NULL)
 {
 	# check arguments
 	checkmate::assertMatrix(x, min.rows = 1)
@@ -58,7 +59,9 @@ lasvmPredict = function (x, model, verbose = FALSE)
 		bias = 	 model$bias,
 		kerneltype = model$kernel,
 		verbose = verbose)
-
+    if (probability & (! is.null(yTrain)))
+        results$probabilities <- plattProbabilities(results$decision.values, yTrain)
+    
 	return (results);
 }
 
