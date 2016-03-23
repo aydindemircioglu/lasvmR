@@ -338,8 +338,8 @@ List lasvmPredictWrapper(
 	max_index = x.cols();
 	
 	
-	// compute predictions
-	NumericVector predictions (x.rows());
+    // compute decision values and predictions
+	NumericVector predictions (x.rows()), fx (x.rows());
 	for (int i=0;i < x.rows();i++)	{
 		double y=-b0;
 		
@@ -347,12 +347,11 @@ List lasvmPredictWrapper(
 			y+=alpha[j] * predictKernel (i,j,NULL);
 		}
 
+        fx[i] = y;
 		if(y>=0) 
-			y=1; 
+			predictions[i]=1; 
 		else 
-			y=-1; 
-		
-		predictions[i] = y;
+			predictions[i]=-1; 		
 	}
 	
 	// free memory
@@ -371,9 +370,10 @@ List lasvmPredictWrapper(
 	xsv_square.clear();	
 	
 	// return list
-	Rcpp::List rl = Rcpp::List::create (
-		Rcpp::Named ("predictions", predictions)
-	);
+    Rcpp::List rl = Rcpp::List::create (
+                                        Rcpp::Named ("predictions", predictions),
+                                        Rcpp::Named ("decision.values", fx)
+                                        );
 	
 	return (rl);
 }
